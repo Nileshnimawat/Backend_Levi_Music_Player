@@ -8,26 +8,29 @@ export const uploadMusic = async (req, res) => {
     
     const { title, artist, duration } = req.body;
 
+    if(!title || !artist || !duration) {
+      return res.status(404).json({success : false,  message: "fill up the requirements" });
+    }
+
     const files = req.files;
-    let url, coverImage;
+
+        const newSong = new Music({
+      title,
+      artist,
+      duration,
+    });
 
     if(files.url){
       const audioResponse = await uploadOnCloudinary(files.url[0].path);
-      if(audioResponse) url = audioResponse.secure_url;
+      if(audioResponse) newSong.url = audioResponse.secure_url;
     }
     
     if(files.coverImage){
        const imageResponse = await uploadOnCloudinary(files.coverImage[0].path);
-       if(imageResponse)  coverImage = imageResponse.secure_url;
+       if(imageResponse)  newSong.coverImage = imageResponse.secure_url;
     }
 
-    const newSong = new Music({
-      title,
-      artist,
-      duration,
-      url,
-      coverImage,
-    });
+
 
     await newSong.save();
 

@@ -11,7 +11,8 @@ export const createPlaylist = async (req, res) => {
   try {
     const userId = req.userId;
     const { title, description } = req.body;
-    if(req.file) console.log(req.file);
+    const file = req.file;
+
 
     if (!userId) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
@@ -24,19 +25,19 @@ export const createPlaylist = async (req, res) => {
       });
     }
 
-    let coverImage = "";
-
-    if (req.file ) {
-      const imageResponse = await uploadOnCloudinary(req.file.path);
-      if (imageResponse) coverImage = imageResponse.secure_url;
-    }
-
-    const newPlaylist = new Playlist({
+        const newPlaylist =  new Playlist({
       title,
       description,
       createdBy: userId,
-      coverImage : coverImage,
+      
     });
+
+    if (file) {
+      const imageResponse = await uploadOnCloudinary(file.path);
+      if (imageResponse) newPlaylist.coverImage = imageResponse.secure_url;
+    }
+
+
 
     await newPlaylist.save();
 
