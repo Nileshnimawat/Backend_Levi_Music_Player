@@ -20,11 +20,10 @@ export const createPlaylist = async (req, res) => {
       });
     }
 
-    const files = req.files;
     let coverImage = "";
 
-    if (files?.coverImage?.path) {
-      const imageResponse = await uploadOnCloudinary(files.coverImage.path);
+    if (req.file && req.file.path) {
+      const imageResponse = await uploadOnCloudinary(req.file.path);
       if (imageResponse) coverImage = imageResponse.secure_url;
     }
 
@@ -55,7 +54,6 @@ export const createPlaylist = async (req, res) => {
   }
 };
 
-
 export const deletePlaylist = async (req, res) => {
   try {
     const playlistId = req.params.id;
@@ -64,7 +62,9 @@ export const deletePlaylist = async (req, res) => {
     const playlist = await Playlist.findById(playlistId);
 
     if (!playlist) {
-      return res.status(404).json({ success: false, message: "Playlist not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Playlist not found" });
     }
 
     if (playlist.createdBy.toString() !== userId) {
@@ -89,27 +89,22 @@ export const deletePlaylist = async (req, res) => {
   }
 };
 
-
-
 export const getAllPlaylists = async (req, res) => {
   try {
     const playlists = await Playlist.find({ createdBy: req.userId });
-
 
     res.status(200).json({
       success: true,
       playlists,
     });
   } catch (error) {
-    console.error('Error fetching playlists:', error.message);
+    console.error("Error fetching playlists:", error.message);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch playlists',
+      message: "Failed to fetch playlists",
     });
   }
 };
-
-
 
 export const addSongToPlaylist = async (req, res) => {
   const { id } = req.params;
@@ -118,17 +113,23 @@ export const addSongToPlaylist = async (req, res) => {
   try {
     const playlist = await Playlist.findById(id);
     if (!playlist) {
-      return res.status(404).json({ success: false, message: "Playlist not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Playlist not found" });
     }
 
     const song = await Music.findById(musicId);
     if (!song) {
-      return res.status(404).json({ success: false, message: "Song not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Song not found" });
     }
 
     const alreadyAdded = playlist.musics.includes(musicId);
     if (alreadyAdded) {
-      return res.status(400).json({ success: false, message: "Song already in playlist" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Song already in playlist" });
     }
 
     playlist.musics.push(musicId);
@@ -157,9 +158,7 @@ export const removeMusicFromPlaylist = async (req, res) => {
       return res.status(404).json({ message: "Playlist not found" });
     }
 
-    playlist.musics = playlist.musics.filter(
-      (id) => id.toString() !== musicId
-    );
+    playlist.musics = playlist.musics.filter((id) => id.toString() !== musicId);
     await playlist.save();
 
     res.status(200).json({ message: "Music removed from playlist", playlist });
@@ -168,4 +167,3 @@ export const removeMusicFromPlaylist = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
