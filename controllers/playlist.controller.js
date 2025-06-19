@@ -1,6 +1,6 @@
 import { Music } from "../models/music.model.js";
 import { Playlist } from "../models/playlist.model.js";
-
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 import { User } from "../models/user.model.js";
 
@@ -9,22 +9,34 @@ export const createPlaylist = async (req, res) => {
     const userId = req.userId;
     const { title, description } = req.body;
 
-    if (!title) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Title is required" });
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    // Create the playlist
+    if (!title) {
+      return res.status(400).json({
+        success: false,
+        message: "Title is required",
+      });
+    }
+
+    const files = req.files;
+    let coverImage = "";
+
+    if (files?.coverImage?.path) {
+      const imageResponse = await uploadOnCloudinary(files.coverImage.path);
+      if (imageResponse) coverImage = imageResponse.secure_url;
+    }
+
     const newPlaylist = new Playlist({
       title,
       description,
-      createdBy: userId, // attach user ID
+      createdBy: userId,
+      coverImage,
     });
 
     await newPlaylist.save();
 
-    // Add playlist ID to user's playlists array
     await User.findByIdAndUpdate(userId, {
       $push: { playlists: newPlaylist._id },
     });
@@ -42,6 +54,7 @@ export const createPlaylist = async (req, res) => {
     });
   }
 };
+
 
 export const deletePlaylist = async (req, res) => {
   try {
