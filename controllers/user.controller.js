@@ -1,7 +1,7 @@
 import { User } from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import cloudinary, { uploadOnCloudinary } from "../utils/cloudinary.js";
+// import cloudinary, { uploadOnCloudinary } from "../utils/cloudinary.js";
 import fs from "fs";
 import { Music } from "../models/music.model.js";
 
