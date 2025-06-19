@@ -12,12 +12,12 @@ export const uploadMusic = async (req, res) => {
     let url, coverImage;
 
     if(files.url){
-      const audioResponse = await uploadOnCloudinary(files.url[0].path);
+      const audioResponse = await uploadOnCloudinary(files.url[0].buffer);
       if(audioResponse) url = audioResponse.secure_url;
     }
     
     if(files.coverImage){
-       const imageResponse = await uploadOnCloudinary(files.coverImage[0].path);
+       const imageResponse = await uploadOnCloudinary(files.coverImage[0].buffer);
        if(imageResponse)  coverImage = imageResponse.secure_url;
     }
 
