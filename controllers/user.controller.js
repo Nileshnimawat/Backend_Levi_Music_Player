@@ -75,13 +75,13 @@ export const Login = async (req, res) => {
       });
     }
 
-    const token = jwt.sign(
+    const tokens = jwt.sign(
       { userId: existingUser._id },
       process.env.SECRET_TOKEN,
       { expiresIn: process.env.SECRET_TOKEN_EXPIRY }
     );
 
-    res.cookie("token", token, {
+    res.cookie("tokens", tokens, {
       httpOnly: true,
       sameSite: "None",
       secure: true,
@@ -103,7 +103,7 @@ export const Login = async (req, res) => {
 };
 
 export const Logout = async (req, res) => {
-  res.clearCookie("token", {
+  res.clearCookie("tokens", {
     httpOnly: true,
     sameSite: "None",
     secure: true,

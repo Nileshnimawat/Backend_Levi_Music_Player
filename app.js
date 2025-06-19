@@ -26,6 +26,7 @@ const allowedOrigins = [
   "https://frontend-levi-music.vercel.app",
   "https://frontend-levi-music-31jsnk76v-nilesh-nimawats-projects.vercel.app",
   "https://frontend-levi-music-git-master-nilesh-nimawats-projects.vercel.app",
+  "https://frontend-levi-music-r600tpud3-nilesh-nimawats-projects.vercel.app"
 ];
 
 app.use(cors({

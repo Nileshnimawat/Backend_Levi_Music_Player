@@ -2,14 +2,14 @@ import jwt from "jsonwebtoken";
 
 export const isAuthenticated = async (req, res, next) => {
   try {
-    const token = req.cookies.token;
-    if (!token) {
+    const tokens = req.cookies.tokens;
+    if (!tokens) {
       return res.status(401).json({
         success: false,
         message: "Unauthorized user access",
       });
     }
-    const decode =  jwt.verify(token, process.env.SECRET_TOKEN);
+    const decode =  jwt.verify(tokens, process.env.SECRET_TOKEN);
 
     if (!decode) {
       return res.status(401).json({

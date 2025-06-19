@@ -26,8 +26,7 @@ export const createPlaylist = async (req, res) => {
 
     let coverImage = "";
 
-    if (req.file && req.file.path) {
-
+    if (req.file ) {
       const imageResponse = await uploadOnCloudinary(req.file.path);
       if (imageResponse) coverImage = imageResponse.secure_url;
     }
@@ -36,7 +35,7 @@ export const createPlaylist = async (req, res) => {
       title,
       description,
       createdBy: userId,
-      coverImage,
+      coverImage : coverImage,
     });
 
     await newPlaylist.save();
