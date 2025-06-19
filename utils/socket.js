@@ -8,13 +8,13 @@ const allowedOrigins = [
   "https://frontend-levi-music.vercel.app",
   "https://frontend-levi-music-31jsnk76v-nilesh-nimawats-projects.vercel.app",
   "https://frontend-levi-music-git-master-nilesh-nimawats-projects.vercel.app",
-  "*"
 ];
 
   const io = new Server(server, {
     cors: {
       origin: allowedOrigins,
       credentials: true,
+       methods: ["GET", "POST", "PUT", "DELETE"]
     },
   });
 
