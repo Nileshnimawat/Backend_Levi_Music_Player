@@ -23,7 +23,8 @@ initializeSocket(socketServer);
 const allowedOrigins = [
   "http://localhost:5173",
   "https://twitter-lite-frontend.vercel.app",
-  "https://frontend-levi-music.vercel.app/"
+  "https://frontend-levi-music.vercel.app",
+  "*"
 ];
 
 app.use(cors({

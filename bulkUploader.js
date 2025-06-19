@@ -4,7 +4,6 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { Music } from "./models/music.model.js";
 import { uploadOnCloudinary } from "./utils/cloudinary.js";
-import { connect } from "http2";
 import connectDB from "./db/user.db.js";
 
 dotenv.config();
@@ -14,7 +13,7 @@ connectDB();
 const musicData = JSON.parse(fs.readFileSync("./music_songs_cleaned.json", "utf-8"));
 
 const extractReleaseDate = () => {
-  return new Date(); // you can customize this if needed
+  return new Date(); 
 };
 
 const uploadAllSongs = async () => {
