@@ -1,38 +1,5 @@
-// import { v2 as cloudinary } from "cloudinary";
-// import fs from "fs";
-// import dotenv from "dotenv";
-// dotenv.config();
-
-// cloudinary.config({
-//   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-//   api_key: process.env.CLOUDINARY_API_KEY,
-//   api_secret: process.env.CLOUDINARY_API_SECRET,
-// });
-
-// export default cloudinary;
-
-// export const uploadOnCloudinary = async (localFilePath) => {
-//   try {
-//     if (!localFilePath) return null;
-//     const response = await cloudinary.uploader.upload(localFilePath, {
-//       resource_type: "auto",
-//     });
-//     fs.unlinkSync(localFilePath);
-//     console.log("File uploaded to Cloudinary:", response.url);
-//     return response;
-//   } catch (error) {
-//     console.error("Cloudinary upload failed:", error);
-//     if (fs.existsSync(localFilePath)) {
-//       fs.unlinkSync(localFilePath);
-//     }
-
-//     return null;
-//   }
-// };
-
-
 import { v2 as cloudinary } from "cloudinary";
-import streamifier from "streamifier";
+import fs from "fs";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -44,23 +11,22 @@ cloudinary.config({
 
 export default cloudinary;
 
-export const uploadBufferToCloudinary = async (buffer, folder = "uploads") => {
-  return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        resource_type: "auto",
-        folder,
-      },
-      (error, result) => {
-        if (error) {
-          console.error("Cloudinary buffer upload failed:", error);
-          return reject(error);
-        }
-        console.log("File uploaded to Cloudinary:", result.secure_url);
-        resolve(result);
-      }
-    );
+export const uploadOnCloudinary = async (localFilePath) => {
+  try {
+    if (!localFilePath) return null;
+    const response = await cloudinary.uploader.upload(localFilePath, {
+      resource_type: "auto",
+    });
+    fs.unlinkSync(localFilePath);
+    console.log("File uploaded to Cloudinary:", response.url);
+    return response;
+  } catch (error) {
+    console.error("Cloudinary upload failed:", error);
+    if (fs.existsSync(localFilePath)) {
+      fs.unlinkSync(localFilePath);
+    }
 
-    streamifier.createReadStream(buffer).pipe(stream);
-  });
+    return null;
+  }
 };
+

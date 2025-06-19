@@ -1,69 +1,17 @@
 import { Music } from "../models/music.model.js";
 import { Playlist } from "../models/playlist.model.js";
-//import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
-import { uploadBufferToCloudinary } from "../utils/cloudinary.js"; // adjust path if needed
 
 
 
 import { User } from "../models/user.model.js";
 
-// export const createPlaylist = async (req, res) => {
-//   try {
-//     const userId = req.userId;
-//     const { title, description } = req.body;
-//     if(req.file) console.log(req.file);
-
-//     if (!userId) {
-//       return res.status(401).json({ success: false, message: "Unauthorized" });
-//     }
-
-//     if (!title) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Title is required",
-//       });
-//     }
-
-//     let coverImage = "";
-
-//     if (req.file && req.file.path) {
-
-//       const imageResponse = await uploadOnCloudinary(req.file.path);
-//       if (imageResponse) coverImage = imageResponse.secure_url;
-//     }
-
-//     const newPlaylist = new Playlist({
-//       title,
-//       description,
-//       createdBy: userId,
-//       coverImage,
-//     });
-
-//     await newPlaylist.save();
-
-//     await User.findByIdAndUpdate(userId, {
-//       $push: { playlists: newPlaylist._id },
-//     });
-
-//     return res.status(201).json({
-//       success: true,
-//       message: "Playlist created successfully",
-//       playlist: newPlaylist,
-//     });
-//   } catch (error) {
-//     console.error("Error creating playlist:", error);
-//     return res.status(500).json({
-//       success: false,
-//       message: "Internal Server Error",
-//     });
-//   }
-// };
-
 export const createPlaylist = async (req, res) => {
   try {
     const userId = req.userId;
     const { title, description } = req.body;
+    if(req.file) console.log(req.file);
 
     if (!userId) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
@@ -78,8 +26,9 @@ export const createPlaylist = async (req, res) => {
 
     let coverImage = "";
 
-    if (req.file && req.file.buffer) {
-      const imageResponse = await uploadBufferToCloudinary(req.file.buffer, "coverImages");
+    if (req.file && req.file.path) {
+
+      const imageResponse = await uploadOnCloudinary(req.file.path);
       if (imageResponse) coverImage = imageResponse.secure_url;
     }
 
@@ -109,6 +58,7 @@ export const createPlaylist = async (req, res) => {
     });
   }
 };
+
 
 
 export const deletePlaylist = async (req, res) => {
