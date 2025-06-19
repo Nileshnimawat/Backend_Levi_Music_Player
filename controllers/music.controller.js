@@ -11,7 +11,6 @@ export const uploadMusic = async (req, res) => {
     const files = req.files;
     let url, coverImage;
 
-    // Cloudinary Uploads
     if(files.url){
       const audioResponse = await uploadOnCloudinary(files.url[0].path);
       if(audioResponse) url = audioResponse.secure_url;
