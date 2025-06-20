@@ -20,6 +20,12 @@ const socketServer = http.createServer(app);
 
 initializeSocket(socketServer);
 
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(cookieParser());
+app.use(compression());
+
 const allowedOrigins = [
   "http://localhost:5173",
   "https://twitter-lite-frontend.vercel.app",
@@ -36,10 +42,6 @@ app.use(cors({
   })
 );
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(cookieParser());
-app.use(compression());
 
 connectDB();
 
