@@ -12,6 +12,8 @@ export const createPlaylist = async (req, res) => {
     const userId = req.userId;
     const { title, description } = req.body;
     const file = req.file;
+    console.log("req.file:", req.file); // 👈 is it undefined?
+
 
 
     if (!userId) {
