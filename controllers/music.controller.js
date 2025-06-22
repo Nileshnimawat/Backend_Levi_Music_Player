@@ -44,6 +44,37 @@ export const uploadMusic = async (req, res) => {
 };
 
 
+export const deleteMusic = async (req, res) => {
+  try {
+    const { musicId } = req.params;
+    const user = await User.findById(req.userId);
+
+    if (!user || user.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+    }
+
+    const deletedMusic = await Music.findByIdAndDelete(musicId);
+    if (!deletedMusic) {
+      return res.status(404).json({ success: false, message: "Music not found" });
+    }
+
+    await Playlist.updateMany(
+      { musics: musicId },
+      { $pull: { musics: musicId } }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Music deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete Music Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
 
 
 

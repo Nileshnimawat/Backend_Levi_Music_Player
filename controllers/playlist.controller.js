@@ -1,37 +1,37 @@
 import { Music } from "../models/music.model.js";
 import { Playlist } from "../models/playlist.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
-
-
-
-
 import { User } from "../models/user.model.js";
 
 export const createPlaylist = async (req, res) => {
   try {
     const userId = req.userId;
-    const { title, description } = req.body;
+    const { title, description, isGlobal } = req.body;
     const file = req.file;
-    console.log("req.file:", req.file);
-
-
 
     if (!userId) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
     if (!title) {
-      return res.status(400).json({
+      return res
+        .status(400)
+        .json({ success: false, message: "Title is required" });
+    }
+
+    const user = await User.findById(userId);
+    if (isGlobal === "true" && user.role !== "admin") {
+      return res.status(403).json({
         success: false,
-        message: "Title is required",
+        message: "Only admins can create global playlists",
       });
     }
 
-        const newPlaylist =  new Playlist({
+    const newPlaylist = new Playlist({
       title,
       description,
       createdBy: userId,
-      
+      isGlobal: isGlobal === "true",
     });
 
     if (file) {
@@ -39,13 +39,13 @@ export const createPlaylist = async (req, res) => {
       if (imageResponse) newPlaylist.coverImage = imageResponse.secure_url;
     }
 
-
-
     await newPlaylist.save();
 
-    await User.findByIdAndUpdate(userId, {
-      $push: { playlists: newPlaylist._id },
-    });
+    if (!newPlaylist.isGlobal) {
+      await User.findByIdAndUpdate(userId, {
+        $push: { playlists: newPlaylist._id },
+      });
+    }
 
     return res.status(201).json({
       success: true,
@@ -61,32 +61,28 @@ export const createPlaylist = async (req, res) => {
   }
 };
 
-
-
 export const deletePlaylist = async (req, res) => {
   try {
     const playlistId = req.params.id;
     const userId = req.userId;
-
     const playlist = await Playlist.findById(playlistId);
-
     if (!playlist) {
       return res
         .status(404)
         .json({ success: false, message: "Playlist not found" });
     }
-
-    if (playlist.createdBy.toString() !== userId) {
+    const user = await User.findById(userId);
+    const isOwner = playlist.createdBy.toString() === userId;
+    const isAdmin = user.role === "admin";
+    if (!isOwner && !isAdmin) {
       return res.status(403).json({ success: false, message: "Unauthorized" });
     }
-
-
     await Playlist.findByIdAndDelete(playlistId);
-
-
-    await User.findByIdAndUpdate(userId, {
-      $pull: { playlists: playlistId },
-    });
+    if (isOwner) {
+      await User.findByIdAndUpdate(userId, {
+        $pull: { playlists: playlistId },
+      });
+    }
 
     return res.status(200).json({
       success: true,

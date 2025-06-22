@@ -4,6 +4,7 @@ import {isAuthenticated }from "../middlewares/isAuthenticated.js"
 import upload from "../middlewares/multer.middleware.js";
 import { User } from "../models/user.model.js";
 
+
 const router = express.Router();
 //auth
 router.route("/signup").post(SignUp);

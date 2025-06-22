@@ -131,20 +131,20 @@ export const toggleLikeSong = async (req, res) => {
     const isLiked = user.liked_playlist.includes(musicId);
 
     if (isLiked) {
-      // Dislike - remove from liked_Playlist
       user.liked_playlist = user.liked_playlist.filter(
         (id) => id.toString() !== musicId
       );
       await user.save();
+
       return res.status(200).json({
         liked: false,
         message: "Removed from liked playlist",
         music: song,
       });
     } else {
-      // Like - add to liked_Playlist
-      user.liked_playlist.push(musicId);
+      user.liked_playlist.unshift(musicId);
       await user.save();
+
       return res.status(200).json({
         liked: true,
         message: "Added to liked playlist",
@@ -160,6 +160,7 @@ export const toggleLikeSong = async (req, res) => {
     });
   }
 };
+
 
 export const getLoggedInUser = async (req, res) => {
   try {

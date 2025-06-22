@@ -7,7 +7,6 @@ import MusicRoute from "./routes/music.routes.js"
 import cookieParser from "cookie-parser";
 import compression from "compression";
 import PlayListRoute from "./routes/playlist.routes.js"
-import AdminRoute from "./routes/admin.routes.js"
 import { initializeSocket } from "./utils/socket.js";
 import http from "http"
 
@@ -49,7 +48,6 @@ connectDB();
 app.use("/api/v1/user", UserRoute);
 app.use("/api/v1/music", MusicRoute);
 app.use("/api/v1/playlist", PlayListRoute);
-app.use("/api/v1/admin", AdminRoute);
 
 
 app.get("/", (req, res) => {

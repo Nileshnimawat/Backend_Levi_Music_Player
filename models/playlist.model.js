@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 
 const playlistSchema = new mongoose.Schema(
@@ -8,29 +7,45 @@ const playlistSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    description: {
+    artist: {
       type: String,
       default: "",
     },
-    coverImage:{
-      type:String,
-      default:""
+    coverImage: {
+      type: String,
+      default: "",
     },
-
     musics: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Music", 
+        ref: "Music",
       },
     ],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      ref: "User", 
+    },
+
+    releaseYear:{
+      type:String,
+      default:new Date().getFullYear()
+    },
+
+    isGlobal: {
+      type: Boolean,
+      default: false,
+    },
+    region: {
+      type: String, 
+      default: "global",
+    },
+    category: {
+      type: String, 
+      default: "",
     },
   },
   {
-    timestamps: true, 
+    timestamps: true,
   }
 );
 

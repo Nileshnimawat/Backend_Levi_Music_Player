@@ -4,6 +4,7 @@ import { isAuthenticated } from "../middlewares/isAuthenticated.js";
 import { createPlaylist, deletePlaylist, getAllPlaylists, addSongToPlaylist, removeMusicFromPlaylist } from "../controllers/playlist.controller.js";
 import upload from "../middlewares/multer.middleware.js";
 
+
 const router = express.Router();
 
 router.route("/createPlaylist").post(isAuthenticated,upload.single("coverImage") , createPlaylist);

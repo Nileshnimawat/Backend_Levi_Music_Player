@@ -1,6 +1,8 @@
 import express from "express";
 import upload from "../middlewares/multer.middleware.js";
-import { getAllMusics, uploadMusic } from "../controllers/music.controller.js";
+import { getAllMusics, deleteMusic, uploadMusic } from "../controllers/music.controller.js";
+import { isAuthenticated } from "../middlewares/isAuthenticated.js";
+import { isAdmin } from "../middlewares/isAdmin.js";
 
 const router = express.Router();
 
@@ -17,6 +19,8 @@ router.post(
 
 
 router.route("/").get(getAllMusics);
+
+router.route("/delete/:id").delete(isAuthenticated,isAdmin, deleteMusic);
 
 
 export default router;
