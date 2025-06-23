@@ -162,6 +162,8 @@ export const toggleLikeSong = async (req, res) => {
 };
 
 
+
+
 export const getLoggedInUser = async (req, res) => {
   try {
     const id = req.userId;
@@ -186,3 +188,28 @@ export const getLoggedInUser = async (req, res) => {
   }
 };
 
+export const getUserLikedMusics = async (req, res) => {
+  const id = req.usedId;
+  try {
+    const musics = await User.findById(id).populate("liked_playlist");
+    if (!musics) {
+      return res.status(404).json({
+        success: false,
+        message: " liked musics not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "liked musics successfully retrived",
+      musics,
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server Error",
+    });
+  }
+};

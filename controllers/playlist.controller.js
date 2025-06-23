@@ -6,7 +6,7 @@ import { User } from "../models/user.model.js";
 export const createPlaylist = async (req, res) => {
   try {
     const userId = req.userId;
-    const { title, description, isGlobal } = req.body;
+    const { title, description, isGlobal, region, category } = req.body;
     const file = req.file;
 
     if (!userId) {
@@ -27,12 +27,19 @@ export const createPlaylist = async (req, res) => {
       });
     }
 
-    const newPlaylist = new Playlist({
+    const newPlaylistData = {
       title,
       description,
-      createdBy: userId,
       isGlobal: isGlobal === "true",
-    });
+      region,
+      category,
+    };
+
+    if (isGlobal !== "true") {
+      newPlaylistData.createdBy = userId;
+    }
+
+    const newPlaylist = new Playlist(newPlaylistData);
 
     if (file) {
       const imageResponse = await uploadOnCloudinary(file.path);
@@ -47,7 +54,7 @@ export const createPlaylist = async (req, res) => {
       });
     }
 
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
       message: "Playlist created successfully",
       playlist: newPlaylist,
@@ -94,7 +101,7 @@ export const deletePlaylist = async (req, res) => {
   }
 };
 
-export const getAllPlaylists = async (req, res) => {
+export const getUserPlaylists = async (req, res) => {
   try {
     const playlists = await Playlist.find({ createdBy: req.userId });
 
@@ -172,3 +179,46 @@ export const removeMusicFromPlaylist = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const getGlobalPlaylists = async (req, res) => {
+  try {
+    const playlists = await Playlist.find({ isGlobal: true });
+
+    return res.status(200).json({
+      success: true,
+      playlists,
+    });
+  } catch (error) {
+    console.error("Error fetching global playlists:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch global playlists",
+    });
+  }
+};
+
+export const getPlaylistByID = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const playlist = await Playlist.findById(id).populate("musics");
+    if (!playlist) {
+      return res.status(404).json({
+        success: false,
+        message: "Playlist not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "playlist successfully retrived",
+      playlist: playlist,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server Error",
+    });
+  }
+};
+
