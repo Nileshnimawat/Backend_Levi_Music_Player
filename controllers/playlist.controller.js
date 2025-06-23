@@ -79,7 +79,7 @@ export const deletePlaylist = async (req, res) => {
         .json({ success: false, message: "Playlist not found" });
     }
     const user = await User.findById(userId);
-    const isOwner = playlist.createdBy.toString() === userId;
+    const isOwner = playlist?.createdBy?.toString() === userId;
     const isAdmin = user.role === "admin";
     if (!isOwner && !isAdmin) {
       return res.status(403).json({ success: false, message: "Unauthorized" });
@@ -200,7 +200,11 @@ export const getGlobalPlaylists = async (req, res) => {
 export const getPlaylistByID = async (req, res) => {
   const { id } = req.params;
   try {
-    const playlist = await Playlist.findById(id).populate("musics");
+    const playlist = await Playlist.findById(id).populate({
+      path: "musics",
+      options: { sort: { createdAt: -1 } } // sort musics by most recent
+    });
+
     if (!playlist) {
       return res.status(404).json({
         success: false,
@@ -210,7 +214,7 @@ export const getPlaylistByID = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "playlist successfully retrived",
+      message: "Playlist successfully retrieved",
       playlist: playlist,
     });
   } catch (error) {
@@ -221,4 +225,5 @@ export const getPlaylistByID = async (req, res) => {
     });
   }
 };
+
 
