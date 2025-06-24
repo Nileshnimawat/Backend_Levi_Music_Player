@@ -154,7 +154,7 @@ export const addSongToPlaylist = async (req, res) => {
     });
   } catch (error) {
     console.error("Error adding song to playlist:", error.message);
-    return res.status(500).json({
+     res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
@@ -167,16 +167,16 @@ export const removeMusicFromPlaylist = async (req, res) => {
     const playlist = await Playlist.findById(req.params.id);
 
     if (!playlist) {
-      return res.status(404).json({ message: "Playlist not found" });
+      return res.status(404).json({ success: false, message: "Playlist not found" });
     }
 
     playlist.musics = playlist.musics.filter((id) => id.toString() !== musicId);
     await playlist.save();
 
-    res.status(200).json({ message: "Music removed from playlist", playlist });
+    return res.status(200).json({ success: false, message: "Music removed from playlist", playlist });
   } catch (error) {
     console.error("Remove music error:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
