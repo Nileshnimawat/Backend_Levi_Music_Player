@@ -103,7 +103,7 @@ export const deletePlaylist = async (req, res) => {
 
 export const getUserPlaylists = async (req, res) => {
   try {
-    const playlists = await Playlist.find({ createdBy: req.userId });
+    const playlists = await Playlist.find({ createdBy: req.userId },"title _id coverImage artist");
 
     res.status(200).json({
       success: true,
@@ -182,7 +182,7 @@ export const removeMusicFromPlaylist = async (req, res) => {
 
 export const getGlobalPlaylists = async (req, res) => {
   try {
-    const playlists = await Playlist.find({ isGlobal: true });
+    const playlists = await Playlist.find({ isGlobal: true }, "_id title artist coverImage");
 
     return res.status(200).json({
       success: true,
@@ -228,12 +228,14 @@ export const getPlaylistByID = async (req, res) => {
 
 export const getHomePagePlaylists = async (req, res) => {
   try {
-    const [topRated, artists, indian, global, mostPlayed] = await Promise.all([
+    const [topRated, artists, indian, global, mostPlayed, musics] = await Promise.all([
       Playlist.find({ category: "topRated", isGlobal:true }, "title _id coverImage artist").limit(12),
       Playlist.find({ category: "artist",isGlobal:true }, "title _id coverImage artist").limit(12),
       Playlist.find({ region : "india",isGlobal:true , category:  "popular" }, "title _id coverImage artist").limit(12),
      Playlist.find({ region: "global",isGlobal:true ,category:  "popular" }, "title _id coverImage artist").limit(12),
       Playlist.find({ category: "mostPlayed" ,isGlobal:true}, "title _id coverImage artist").limit(5),
+      Music.find({}, "title _id url duration createdAt coverImage artist").sort({ createdAt: -1 }) .limit(8)
+
     ]);
 
     return res.status(200).json({
@@ -245,6 +247,7 @@ export const getHomePagePlaylists = async (req, res) => {
         indian,
         global,
         mostPlayed,
+        musics
       },
     });
   } catch (error) {

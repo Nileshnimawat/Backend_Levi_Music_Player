@@ -169,7 +169,7 @@ export const toggleLikeSong = async (req, res) => {
 export const getLoggedInUser = async (req, res) => {
   try {
     const id = req.userId;
-    const user = await User.findById(id);
+    const user = await User.findById(id).select("name _id liked_playlist role playlists");
     if (!user) {
       return res.status(404).json({
         success: false,
