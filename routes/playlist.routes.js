@@ -1,7 +1,7 @@
 import express from "express";
 import { Music } from "../models/music.model.js";
 import { isAuthenticated } from "../middlewares/isAuthenticated.js";
-import { createPlaylist,getPlaylistByID, deletePlaylist, getUserPlaylists, addSongToPlaylist, removeMusicFromPlaylist, getGlobalPlaylists } from "../controllers/playlist.controller.js";
+import { getHomePagePlaylists,createPlaylist,getPlaylistByID, deletePlaylist, getUserPlaylists, addSongToPlaylist, removeMusicFromPlaylist, getGlobalPlaylists } from "../controllers/playlist.controller.js";
 import upload from "../middlewares/multer.middleware.js";
 
 
@@ -15,7 +15,10 @@ router.route("/addMusic/:id").post( isAuthenticated, addSongToPlaylist);
 router.route("/removeMusic/:id").put( isAuthenticated, removeMusicFromPlaylist); 
 router.route("/global").get(getGlobalPlaylists);
 
+
+router.route("/homePlaylists").get(getHomePagePlaylists);
 router.route("/:id").get(getPlaylistByID);
+
 
 
 

@@ -226,4 +226,34 @@ export const getPlaylistByID = async (req, res) => {
   }
 };
 
+export const getHomePagePlaylists = async (req, res) => {
+  try {
+    const [topRated, artists, indian, global, mostPlayed] = await Promise.all([
+      Playlist.find({ category: "topRated", isGlobal:true }, "title _id coverImage artist").limit(12),
+      Playlist.find({ category: "artist",isGlobal:true }, "title _id coverImage artist").limit(12),
+      Playlist.find({ region : "india",isGlobal:true , category:  "popular" }, "title _id coverImage artist").limit(12),
+     Playlist.find({ region: "global",isGlobal:true ,category:  "popular" }, "title _id coverImage artist").limit(12),
+      Playlist.find({ category: "mostPlayed" ,isGlobal:true}, "title _id coverImage artist").limit(5),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      message: "Home page playlists fetched successfully",
+      data: {
+        topRated,
+        artists,
+        indian,
+        global,
+        mostPlayed,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching home page playlists:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong while fetching home page playlists",
+    });
+  }
+};
+
 

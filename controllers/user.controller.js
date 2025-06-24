@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 // import cloudinary, { uploadOnCloudinary } from "../utils/cloudinary.js";
 import fs from "fs";
 import { Music } from "../models/music.model.js";
+import { Playlist } from "../models/playlist.model.js";
 
 export const SignUp = async (req, res) => {
   try {
@@ -122,11 +123,15 @@ export const toggleLikeSong = async (req, res) => {
   try {
     const user = await User.findById(userId);
     if (!user)
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
 
     const song = await Music.findById(musicId);
     if (!song)
-      return res.status(404).json({ success: false, message: "Music not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Music not found" });
 
     const isLiked = user.liked_playlist.includes(musicId);
 
@@ -160,9 +165,6 @@ export const toggleLikeSong = async (req, res) => {
     });
   }
 };
-
-
-
 
 export const getLoggedInUser = async (req, res) => {
   try {
@@ -204,12 +206,76 @@ export const getUserLikedMusics = async (req, res) => {
       message: "liked musics successfully retrived",
       musics,
     });
-
   } catch (error) {
     console.log(error);
     res.status(500).json({
       success: false,
       message: "Internal server Error",
+    });
+  }
+};
+
+export const getStats = async (req, res) => {
+  try {
+    const users = await User.find();
+    const musics = await Music.find();
+    const artist = await Playlist.find({ category: "artist" });
+    const playlists = await Playlist.find({ isGlobal: true });
+
+    const stats = {
+      users: users.length,
+      musics: musics.length,
+      artists: artist.length,
+      playlists: playlists.length,
+    };
+
+    return res.status(200).json({
+      success: true,
+      message: "Stats retrieved successfully",
+      stats,
+    });
+  } catch (error) {
+    console.error("Error getting stats:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to retrieve stats",
+      error: error.message,
+    });
+  }
+};
+
+export const searchItems = async (req, res) => {
+  const query = req.query.q;
+  if (!query) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Search query required" });
+  }
+
+  try {
+    const regex = new RegExp(query, "i");
+
+    const [musics, artists, playlists] = await Promise.all([
+      Music.find({ $or: [{ title: regex }, { artist: regex }] },"title _id url coverImage artist" ).limit(10),
+
+      Playlist.find({ category: "artist", title: regex },"title _id coverImage").limit(10),
+
+      Playlist.find({ category: { $ne: "artist" }, title: regex },"title _id coverImage").limit(10),]);
+
+    return res.status(200).json({
+      success: true,
+      message: "Search results fetched",
+      results: {
+        musics,
+        artists,
+        playlists,
+      },
+    });
+  } catch (error) {
+    console.error("Search Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
     });
   }
 };
