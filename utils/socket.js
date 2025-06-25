@@ -1,80 +1,81 @@
 import { Server } from "socket.io";
-import { Message } from "../models/message.model.js";
 
 export const initializeSocket = (server) => {
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://twitter-lite-frontend.vercel.app",
-  "https://frontend-levi-music.vercel.app",
-  "https://frontend-levi-music-31jsnk76v-nilesh-nimawats-projects.vercel.app",
-  "https://frontend-levi-music-git-master-nilesh-nimawats-projects.vercel.app",
-];
+  console.log("🧠 Socket.IO initialized...");
+  const allowedOrigins = [
+    "http://localhost:5173",
+    "https://twitter-lite-frontend.vercel.app",
+    "https://frontend-levi-music.vercel.app",
+    "https://frontend-levi-music-31jsnk76v-nilesh-nimawats-projects.vercel.app",
+    "https://frontend-levi-music-git-master-nilesh-nimawats-projects.vercel.app",
+  ];
 
   const io = new Server(server, {
+   
     cors: {
       origin: allowedOrigins,
       credentials: true,
-       methods: ["GET", "POST", "PUT", "DELETE"]
+      methods: ["GET", "POST", "PUT", "DELETE"],
     },
   });
 
-  const userSockets = new Map(); // { userId: socketId}
-  const userActivities = new Map(); // {userId: activity}
+  // console.log(io)
+
+  const userSockets = new Map();       // userId => socketId
+  const userActivities = new Map();    // userId => activity object
+  const userInfoMap = new Map();       // userId => { _id, username, avatar }
 
   io.on("connection", (socket) => {
-    socket.on("user_connected", (userId) => {
-      userSockets.set(userId, socket.id);
-      userActivities.set(userId, "Idle");
+    
+    
+    socket.on("user_connected", (user) => {
+      console.log(`User Connected Socket ID : ${socket.id} User : ${user.name} UserID : ${user._id}`);
+      const { _id, name, coverImage } = user;
 
-      // broadcast to all connected sockets that this user just logged in
-      io.emit("user_connected", userId);
+      userSockets.set(_id, socket.id);
+      userActivities.set(_id, { status: "Idle" });
+      userInfoMap.set(_id, { _id, name: user.name, coverImage });
 
+      io.emit("user_connected", { _id, name, coverImage });
+      
       socket.emit("users_online", Array.from(userSockets.keys()));
+      socket.emit("activities", Array.from(userActivities.entries()));
+      socket.emit("users_info", Array.from(userInfoMap.entries()));
 
-      io.emit("activities", Array.from(userActivities.entries()));
+      console.log(userActivities)
+      console.log(userSockets)
+      console.log(userInfoMap)
     });
 
-    socket.on("update_activity", ({ userId, activity }) => {
-      console.log("activity updated", userId, activity);
+    // Music playback auto-sets activity
+    socket.on("update_current_music", ({ userId, music }) => {
+      const title = music?.title || null;
+      const artist = music?.artist || null;
+
+      const activity = title && artist
+        ? { status: "Playing", title, artist }
+        : { status: "Idle" };
+
       userActivities.set(userId, activity);
       io.emit("activity_updated", { userId, activity });
     });
 
-    socket.on("send_message", async (data) => {
-      try {
-        const { senderId, receiverId, content } = data;
-
-        const message = await Message.create({
-          senderId,
-          receiverId,
-          content,
-        });
-
-        // send to receiver in realtime, if they're online
-        const receiverSocketId = userSockets.get(receiverId);
-        if (receiverSocketId) {
-          io.to(receiverSocketId).emit("receive_message", message);
-        }
-
-        socket.emit("message_sent", message);
-      } catch (error) {
-        console.error("Message error:", error);
-        socket.emit("message_error", error.message);
-      }
-    });
 
     socket.on("disconnect", () => {
-      let disconnectedUserId;
+      let disconnectedUserId = null;
+
       for (const [userId, socketId] of userSockets.entries()) {
-        // find disconnected user
         if (socketId === socket.id) {
           disconnectedUserId = userId;
           userSockets.delete(userId);
           userActivities.delete(userId);
+          userInfoMap.delete(userId);
           break;
         }
       }
+
       if (disconnectedUserId) {
+        console.log("User Disconnected Successfully : ", disconnectedUserId);
         io.emit("user_disconnected", disconnectedUserId);
       }
     });
