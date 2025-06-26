@@ -125,23 +125,22 @@ export const addSongToPlaylist = async (req, res) => {
   try {
     const playlist = await Playlist.findById(id);
     if (!playlist) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Playlist not found" });
+      return res.status(404).json({ success: false, message: "Playlist not found" });
+    }
+
+    // Only owner or admin can add song
+    if (playlist.owner.toString() !== req.user._id && req.user.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Not authorized to modify this playlist" });
     }
 
     const song = await Music.findById(musicId);
     if (!song) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Song not found" });
+      return res.status(404).json({ success: false, message: "Song not found" });
     }
 
     const alreadyAdded = playlist.musics.includes(musicId);
     if (alreadyAdded) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Song already in playlist" });
+      return res.status(400).json({ success: false, message: "Song already in playlist" });
     }
 
     playlist.musics.push(musicId);
@@ -154,7 +153,7 @@ export const addSongToPlaylist = async (req, res) => {
     });
   } catch (error) {
     console.error("Error adding song to playlist:", error.message);
-     res.status(500).json({
+    res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
@@ -162,18 +161,26 @@ export const addSongToPlaylist = async (req, res) => {
 };
 
 export const removeMusicFromPlaylist = async (req, res) => {
-  try {
-    const { musicId } = req.body;
-    const playlist = await Playlist.findById(req.params.id);
+  const { musicId } = req.body;
 
+  try {
+    const playlist = await Playlist.findById(req.params.id);
     if (!playlist) {
       return res.status(404).json({ success: false, message: "Playlist not found" });
+    }
+
+    if (playlist.owner.toString() !== req.user._id && req.user.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Not authorized to modify this playlist" });
     }
 
     playlist.musics = playlist.musics.filter((id) => id.toString() !== musicId);
     await playlist.save();
 
-    return res.status(200).json({ success: false, message: "Music removed from playlist", playlist });
+    return res.status(200).json({
+      success: true,
+      message: "Music removed from playlist",
+      playlist,
+    });
   } catch (error) {
     console.error("Remove music error:", error);
     res.status(500).json({ success: false, message: "Server error" });
