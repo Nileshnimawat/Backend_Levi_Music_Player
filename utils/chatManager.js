@@ -1,9 +1,9 @@
 import { nanoid } from "nanoid";
 
-export const roomChats = new Map(); // roomId => [messages]
-export const userRooms = new Map(); // socketId => Set of roomIds
-export const roomUsers = new Map(); // roomId => Map(userId => userObj)
-
+export const roomChats = new Map();       // roomId => [messages]
+export const userRooms = new Map();       // socketId => Set of roomIds
+export const roomUsers = new Map();       // roomId => Map(userId => userObj)
+export const roomOwners = new Map();      // roomId => ownerUserId
 
 export const createRoom = () => {
   const roomId = nanoid(8);
@@ -19,9 +19,13 @@ export const joinRoom = (socket, roomId, user) => {
   if (!userRooms.has(socket.id)) userRooms.set(socket.id, new Set());
   userRooms.get(socket.id).add(roomId);
 
-
   if (!roomUsers.has(roomId)) roomUsers.set(roomId, new Map());
-  roomUsers.get(roomId).set(user._id, user);
+  const userMap = roomUsers.get(roomId);
+  userMap.set(user._id, user);
+
+  if (!roomOwners.has(roomId)) {
+    roomOwners.set(roomId, user._id);
+  }
 
   socket.to(roomId).emit("user_joined", user);
 };
@@ -36,18 +40,17 @@ export const leaveRoom = (socket, roomId, userId) => {
     if (rooms.size === 0) userRooms.delete(socket.id);
   }
 
-
   const userMap = roomUsers.get(roomId);
   if (userMap) {
     userMap.delete(userId);
     if (userMap.size === 0) {
       roomUsers.delete(roomId);
       roomChats.delete(roomId);
+      roomOwners.delete(roomId); 
       console.log(`🗑️ Room ${roomId} deleted (empty)`);
     }
   }
 };
-
 
 export const leaveAllRooms = (socket, userId) => {
   const rooms = userRooms.get(socket.id);
@@ -64,6 +67,7 @@ export const leaveAllRooms = (socket, userId) => {
       if (userMap.size === 0) {
         roomUsers.delete(roomId);
         roomChats.delete(roomId);
+        roomOwners.delete(roomId);
         console.log(`🗑️ Room ${roomId} deleted (empty)`);
       }
     }
@@ -75,12 +79,12 @@ export const leaveAllRooms = (socket, userId) => {
   return leftRooms;
 };
 
+
 export const sendMessage = (roomId, messageObj) => {
   if (!roomChats.has(roomId)) return;
   roomChats.get(roomId).push(messageObj);
   console.log(`💬 Message added to room ${roomId}:`, messageObj);
 };
-
 
 export const getRoomMessages = (roomId) => {
   return roomChats.get(roomId) || [];
@@ -90,4 +94,9 @@ export const getRoomMessages = (roomId) => {
 export const getRoomUsers = (roomId) => {
   const usersMap = roomUsers.get(roomId);
   return usersMap ? Array.from(usersMap.values()) : [];
+};
+
+
+export const getRoomOwner = (roomId) => {
+  return roomOwners.get(roomId);
 };

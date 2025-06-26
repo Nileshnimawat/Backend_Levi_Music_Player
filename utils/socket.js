@@ -7,6 +7,7 @@ import {
   leaveRoom,
   leaveAllRooms,
   getRoomUsers,
+  getRoomOwner
 } from "./chatManager.js";
 
 export const initializeSocket = (server) => {
@@ -50,11 +51,12 @@ export const initializeSocket = (server) => {
       socket.data.userId = _id;
     });
 
-
     socket.on("update_current_music", ({ userId, music }) => {
       const { title = null, artist = null } = music || {};
       const activity =
-        title && artist ? { status: "Playing", title, artist } : { status: "Idle" };
+        title && artist
+          ? { status: "Playing", title, artist }
+          : { status: "Idle" };
 
       userActivities.set(userId, activity);
       io.emit("activity_updated", { userId, activity });
@@ -82,7 +84,6 @@ export const initializeSocket = (server) => {
       io.to(roomId).emit("room_users", users);
     });
 
- 
     socket.on("leave_room", ({ roomId, userId }) => {
       leaveRoom(socket, roomId, userId);
 
@@ -93,7 +94,27 @@ export const initializeSocket = (server) => {
       console.log(`🚪 User ${userId} left room ${roomId}`);
     });
 
-   
+    //set current music
+    socket.on("send_music", ({ roomId, music }) => {
+      const userId = socket.data.userId;
+      const ownerId = getRoomOwner(roomId);
+
+      if (userId !== ownerId) return;
+      io.to(roomId).emit("receive_music", { music });
+    });
+
+    socket.on("toggle_play_pause", ({ isPlaying, roomId }) => {
+      const userId = socket.data.userId;
+      const ownerId = getRoomOwner(roomId);
+
+      if (userId !== ownerId)  return;
+      socket.to(roomId).emit("receive_play_pause", { isPlaying });
+    });
+
+    socket.on("sync-progress", ({ roomId, currentTime }) => {
+      socket.to(roomId).emit("receive-progress", { currentTime });
+    });
+
     socket.on("send_message", ({ roomId, message }) => {
       const User = {
         _id: message.user._id,
@@ -110,7 +131,6 @@ export const initializeSocket = (server) => {
       sendMessage(roomId, messageObj);
       io.to(roomId).emit("receive_message", messageObj);
     });
-
 
     socket.on("disconnect", () => {
       const userId = socket.data.userId;
