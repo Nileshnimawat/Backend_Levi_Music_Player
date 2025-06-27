@@ -128,8 +128,8 @@ export const addSongToPlaylist = async (req, res) => {
       return res.status(404).json({ success: false, message: "Playlist not found" });
     }
 
-    // Only owner or admin can add song
-    if (playlist.owner.toString() !== req.user._id && req.user.role !== "admin") {
+    
+    if  (!playlist.createdBy.equals(req.user._id) && req.user.role !== "admin") {
       return res.status(403).json({ success: false, message: "Not authorized to modify this playlist" });
     }
 
@@ -169,7 +169,7 @@ export const removeMusicFromPlaylist = async (req, res) => {
       return res.status(404).json({ success: false, message: "Playlist not found" });
     }
 
-    if (playlist.owner.toString() !== req.user._id && req.user.role !== "admin") {
+    if (!playlist.createdBy.equals(req.user._id) && req.user.role !== "admin"){
       return res.status(403).json({ success: false, message: "Not authorized to modify this playlist" });
     }
 
