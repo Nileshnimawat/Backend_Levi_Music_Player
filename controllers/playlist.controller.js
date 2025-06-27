@@ -122,6 +122,9 @@ export const addSongToPlaylist = async (req, res) => {
   const { id } = req.params;
   const { musicId } = req.body;
 
+  const userId = req.userId;
+  const user = await User.findById(req.userId);
+
   try {
     const playlist = await Playlist.findById(id);
     if (!playlist) {
@@ -162,6 +165,8 @@ export const addSongToPlaylist = async (req, res) => {
 
 export const removeMusicFromPlaylist = async (req, res) => {
   const { musicId } = req.body;
+  const userId = req.userId;
+  const user = await User.findById(req.userId);
 
   try {
     const playlist = await Playlist.findById(req.params.id);
