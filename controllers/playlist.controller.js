@@ -122,17 +122,18 @@ export const addSongToPlaylist = async (req, res) => {
   const { id } = req.params;
   const { musicId } = req.body;
 
-  const userId = req.userId;
-  const user = await User.findById(req.userId);
-
   try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(401).json({ success: false, message: "User not found" });
+    }
+
     const playlist = await Playlist.findById(id);
     if (!playlist) {
       return res.status(404).json({ success: false, message: "Playlist not found" });
     }
 
-    
-    if  (!playlist.createdBy.equals(req.user._id) && req.user.role !== "admin") {
+    if (String(playlist.createdBy) !== String(user._id) && user.role !== "admin") {
       return res.status(403).json({ success: false, message: "Not authorized to modify this playlist" });
     }
 
@@ -141,8 +142,7 @@ export const addSongToPlaylist = async (req, res) => {
       return res.status(404).json({ success: false, message: "Song not found" });
     }
 
-    const alreadyAdded = playlist.musics.includes(musicId);
-    if (alreadyAdded) {
+    if (playlist.musics.includes(musicId)) {
       return res.status(400).json({ success: false, message: "Song already in playlist" });
     }
 
@@ -155,26 +155,28 @@ export const addSongToPlaylist = async (req, res) => {
       playlist,
     });
   } catch (error) {
-    console.error("Error adding song to playlist:", error.message);
+    console.error("Error adding song to playlist:", error);
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
   }
 };
-
 export const removeMusicFromPlaylist = async (req, res) => {
   const { musicId } = req.body;
-  const userId = req.userId;
-  const user = await User.findById(req.userId);
 
   try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(401).json({ success: false, message: "User not found" });
+    }
+
     const playlist = await Playlist.findById(req.params.id);
     if (!playlist) {
       return res.status(404).json({ success: false, message: "Playlist not found" });
     }
 
-    if (!playlist.createdBy.equals(req.user._id) && req.user.role !== "admin"){
+    if (String(playlist.createdBy) !== String(user._id) && user.role !== "admin") {
       return res.status(403).json({ success: false, message: "Not authorized to modify this playlist" });
     }
 
@@ -191,6 +193,7 @@ export const removeMusicFromPlaylist = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
 
 export const getGlobalPlaylists = async (req, res) => {
   try {

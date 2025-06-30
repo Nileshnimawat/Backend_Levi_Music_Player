@@ -7,7 +7,8 @@ import MusicRoute from "./routes/music.routes.js"
 import cookieParser from "cookie-parser";
 import compression from "compression";
 import PlayListRoute from "./routes/playlist.routes.js"
-import { initializeSocket } from "./utils/socket.js";
+import { initializeSocket } from "./Socket/socket.js";
+
 import http from "http"
 
 
