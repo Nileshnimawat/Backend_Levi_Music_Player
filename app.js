@@ -28,7 +28,6 @@ app.use(compression());
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://twitter-lite-frontend.vercel.app",
   "https://frontend-levi-music.vercel.app",
   "https://frontend-levi-music-31jsnk76v-nilesh-nimawats-projects.vercel.app",
   "https://frontend-levi-music-git-master-nilesh-nimawats-projects.vercel.app",
