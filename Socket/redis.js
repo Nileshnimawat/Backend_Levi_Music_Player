@@ -6,6 +6,7 @@ const redis = new Redis({
   password: process.env.REDIS_PASSWORD || undefined,
   maxRetriesPerRequest: null,
   enableReadyCheck: false,
+   tls: process.env.REDIS_TLS === "true" ? {} : undefined,
 });
 
 redis.on("connect", () => {
