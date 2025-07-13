@@ -68,7 +68,7 @@ Backend_Levi_Music_Player/
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/your-username/Backend_Levi_Music_Player.git
+git clone https://github.com/Nileshnimawat/Backend_Levi_Music_Player.git
 cd Backend_Levi_Music_Player
 ```
 
