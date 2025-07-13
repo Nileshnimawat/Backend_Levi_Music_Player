@@ -48,15 +48,16 @@ This is the backend server of the **Levi Music Player**, a full-featured music s
 
 ```
 Backend_Levi_Music_Player/
-├── config/           # MongoDB, Redis configuration
+├── db/           # MongoDB configuration
 ├── controllers/      # Logic for users, playlists, admin, rooms
 ├── middlewares/      # Auth, admin protection, error handling
 ├── models/           # Mongoose schemas (User, Song, Playlist, Room)
 ├── routes/           # Route definitions for users, music, rooms
-├── socket/           # Socket.IO server setup
-├── utils/            # Helper functions (e.g., redisClient)
+├── Socket/           # Socket.IO server setup, Redis Setup
+├── utils/            # Helper functions cloudinary setup
 ├── .env              # Environment variables
-├── server.js         # Main entry point
+├── app.js            # socket + mongdb integrated connection setup
+├── index.js         # Main entry point
 └── package.json      # Project dependencies
 ```
 
@@ -82,7 +83,7 @@ npm install
 Create a `.env` file and add:
 
 ```env
-PORT=5000
+PORT=8080
 MONGO_URI=your_mongodb_uri
 JWT_SECRET=your_jwt_secret
 REDIS_URL=redis://localhost:6379
@@ -106,11 +107,9 @@ npm run dev
 
 | Endpoint              | Method | Description               |
 |-----------------------|--------|---------------------------|
-| `/api/auth/register`  | POST   | Register a new user       |
-| `/api/auth/login`     | POST   | Login user                |
-| `/api/user/:id/like`  | PUT    | Like/unlike a song        |
+| `/api/user/register`  | POST   | Register a new user       |
+| `/api/user/login`     | POST   | Login user                |   |
 | `/api/playlist`       | CRUD   | Manage playlists          |
-| `/api/room`           | CRUD   | Create/join/leave room    |
 | `/api/admin/*`        | VARIES | Admin protected routes    |
 
 ---
